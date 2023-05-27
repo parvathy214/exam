@@ -1,8 +1,8 @@
 const express = require('express');
-const userData=require('../model/user')
+const userData=require('../model/otp')
 var router = express.Router();
 var jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
+const nodeMailer = require('nodemailer');
 
 
 function generate_otp(length) {
