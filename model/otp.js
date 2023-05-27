@@ -1,21 +1,21 @@
 const mongoose = require('mongoose');
+
+
+mongoose.connect(`mongodb+srv://p4parvathy214:Lekhaatlas@cluster0.ndcrk8y.mongodb.net/Exam?retryWrites=true&w=majority`,{useNewUrlParser: true})
+.then(() => {
+    console.log("Database Connection Successful")
+   }).catch((err) => {
+    console.log(err)
+   })
+
 const Schema = mongoose.Schema;
 
-const userSchema = new mongoose.Schema({
-    name : {
-        type: String,
-    
-    },
-    email :{
-        type: String,
-        required : true
-    },
-    otp :{
-        type: String,
-       
-    }
-});
+var NewUserSchema = new Schema({
+    email: String,
+    otp:Number
+   }, {
+    versionKey: false
+   })
 
-const userInfo = mongoose.model('user', userSchema);
-module.exports = userInfo;
-
+var user = mongoose.model('user', NewUserSchema);
+module.exports = user;

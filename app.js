@@ -1,28 +1,81 @@
 const express = require('express');
 const cors = require('cors');
-const bodyparser = require('body-parser');
-const app =express()
+const path=require('path');
+const user = require('./model/otp');
+const nodemailer = require('nodemailer');
 
+const app=express();
 app.use(cors());
-app.use(bodyparser.json());
-app.use(express.json());
-app.use(express.urlencoded({extended:true}))
+app.use(express.json({urlencoded:true}));
 
-const mongoose = require('./db')
-const api = require('./routes/api')
-app.use('/api',api)
+app.use(express.static('./dist/frontend'));
 
 
+app.post('/api/email',(req,res)=>{
+    res.header("Access-Control-Allow-Origin","*");
+    res.header("Access-Control-Allow-Method:GET,POST,PUT,DELETE")
+    const randomPin = Math.floor(1000 + Math.random() * 9000);
+    var data ={
+     email : req.body.email,
+     otp:randomPin
+    }
+    var authdb = new user(data)
+    authdb.save().then((data)=>{
+   
+     var transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+          user: 'amalashraf04@gmail.com',
+          pass: 'xwyqvkduyyedqfzj'
+      }
+   });
+   
+   var mailOptions = {
+      from: 'fsddemo543@gmail.com',
+      to: data.email,
+      subject: 'OTP',
+      text: `OTP is ${data.otp}`
+   
+   };
 
-//hosting
+   transporter.sendMail(mailOptions, function(error, info){
+    if(error){
+        console.log(error);
+    } else {
+        console.log('email send:'+info.response);
+    }
+ });
+   
+   console.log(data)
+  res.send(data)
+  }
+   )
+ 
+ })
+ 
+ app.post('/api/otp',(req,res)=>{
+   var data = {
+     email:req.body.email,
+     otp:req.body.otp
+ }
+ user.findOne({email:data.email,otp:data.otp}).then((data)=>{
+  if (data != null ){
+   console.log("otp verify",data)
+   res.send(data)
+  }
+  else{
+ res.send(null)
+  }
+  
+ })
+ })
 
-const path = require('path');
-app.use(express.static('./dist/frontend/'))
-app.get('/*', function(req, res) { res.sendFile(path.join(__dirname + '/dist/frontend/index.html')); });
+  app.get('/*', function (req, res) {
+  res.sendFile(path.join(__dirname + '/dist/frontend/index.html'));
+ });
 
-app.listen(3000,()=>{
-    console.log("server running at 3000");
+
+const PORT=process.env.PORT||3000;
+app.listen(PORT,()=>{
+    console.log(`app is live at ${PORT}`);
 })
-
-
-
